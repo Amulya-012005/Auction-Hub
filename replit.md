@@ -1,45 +1,68 @@
-# [Project name]
+# Auction-Hub
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A complete live auction platform with separate buyer and seller flows, realtime bidding via Socket.io, and a dark futuristic UI.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080, Socket.io on /api/socket.io)
+- `pnpm --filter @workspace/auction-hub run dev` — run the frontend (port varies, preview at /)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `DATABASE_URL`, `SESSION_SECRET`
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
+- Frontend: React + Vite, TailwindCSS, Framer Motion, Wouter, shadcn/ui, socket.io-client
+- API: Express 5 + Socket.io (realtime bidding)
+- DB: PostgreSQL + Drizzle ORM (tables: users, auctions, bids, categories)
+- Auth: JWT (bcryptjs + jsonwebtoken), token stored in localStorage
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `lib/api-spec/openapi.yaml` — OpenAPI source of truth
+- `lib/db/src/schema/` — DB schema (users, auctions, bids, categories)
+- `artifacts/api-server/src/routes/` — Express route handlers (auth, auctions, bids, categories)
+- `artifacts/api-server/src/lib/auth.ts` — JWT + bcrypt helpers
+- `artifacts/api-server/src/middleware/requireAuth.ts` — JWT auth middleware
+- `artifacts/auction-hub/src/` — React frontend
+- `artifacts/auction-hub/src/hooks/use-auth.ts` — auth context/hook
+- `artifacts/auction-hub/src/pages/` — all pages (landing, login, register, buyer/*, seller/*)
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- JWT auth (not session-based): token stored in localStorage as `auction_hub_token`, sent as Bearer header in all API calls
+- Socket.io path is `/api/socket.io` (served by Express HTTP server alongside REST API)
+- Separate buyer/seller protected routes enforced client-side by role check from JWT user
+- Realtime bids: server emits `bid:new` to room `auction:{id}` on every placed bid; clients join room on auction detail page mount
+- OpenAPI-first: all API contracts defined in `openapi.yaml`, codegen produces typed React Query hooks and Zod schemas
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Landing page with live stats (active auctions, total bids, total value)
+- Buyer flow: browse live auctions with search/filter/sort, place bids in realtime, view bid history, see won auctions
+- Seller flow: create auctions, view all bids per auction, manually accept winner
+- 10 pre-seeded demo auctions across 10 categories (Electronics, Vehicles, Watches, Sneakers, Gaming, Gold, Fashion, Furniture, Cosmetics, Collectibles)
+- Demo accounts: `demo.buyer@hub.com` / `password123` (buyer), `alex@seller.com` / `password123` (seller)
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Dark futuristic theme always (no light mode)
+- Brand colors: deep dark bg (#0a0a0f), neon red/crimson primary (hsl 355 85% 50%)
+- No emojis in UI
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Password hash in seed data uses bcrypt rounds=12 with hardcoded hash — if changing password logic, re-seed users
+- Socket.io WS path `/api/socket.io` must be listed in artifact.toml paths for the proxy to forward WS connections
+- `useAcceptWinner` hook requires `id` param (auction id) — pass as first arg
 
 ## Pointers
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- See `pnpm-workspace` skill for workspace structure
+- See `lib/api-spec/openapi.yaml` for all endpoint contracts
