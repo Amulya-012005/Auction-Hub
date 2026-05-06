@@ -242,8 +242,103 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased text-foreground;
+    background: #0d0408;
   }
+}
+
+/* ── Floating orb animations ── */
+@keyframes float-1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(60px, -80px) scale(1.08); }
+  66%  { transform: translate(-40px, 40px) scale(0.94); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes float-2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  40%  { transform: translate(-70px, 60px) scale(1.1); }
+  80%  { transform: translate(50px, -30px) scale(0.92); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes float-3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(80px, 80px) scale(0.9); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes float-4 {
+  0%   { transform: translate(0, 0) scale(1); }
+  30%  { transform: translate(-90px, -50px) scale(1.05); }
+  70%  { transform: translate(40px, 70px) scale(0.96); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(180, 20, 50, 0.18) 0%, transparent 70%);
+  top: -100px; left: -100px;
+  animation: float-1 22s ease-in-out infinite;
+}
+.orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(140, 10, 40, 0.14) 0%, transparent 70%);
+  bottom: 10%; right: -80px;
+  animation: float-2 28s ease-in-out infinite;
+}
+.orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
+  top: 40%; left: 50%;
+  animation: float-3 18s ease-in-out infinite;
+}
+.orb-4 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(100, 10, 30, 0.12) 0%, transparent 70%);
+  bottom: -80px; left: 30%;
+  animation: float-4 24s ease-in-out infinite;
+}
+
+/* ── Glass card ── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(220, 38, 38, 0.12) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 8px 32px rgba(0,0,0,0.4);
+}
+
+/* ── Auction card with glow ── */
+.auction-card {
+  background: rgba(15, 5, 10, 0.7) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(220, 38, 38, 0.1) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 4px 24px rgba(0,0,0,0.5);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+.auction-card:hover {
+  border-color: rgba(220, 38, 38, 0.35) !important;
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.15), 0 8px 32px rgba(0,0,0,0.6) !important;
+}
+
+/* ── Glow button ── */
+.glow-btn {
+  background: linear-gradient(135deg, hsl(355 85% 50%), hsl(355 85% 40%)) !important;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.35);
+  transition: box-shadow 0.2s ease, transform 0.15s ease !important;
+}
+.glow-btn:hover:not(:disabled) {
+  box-shadow: 0 0 22px rgba(220, 38, 38, 0.65), 0 0 6px rgba(220, 38, 38, 0.4) !important;
+  transform: translateY(-1px) scale(1.02) !important;
+}
+.glow-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98) !important;
 }
 
 /**

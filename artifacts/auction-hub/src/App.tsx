@@ -16,24 +16,26 @@ import BuyerDashboard from "@/pages/buyer-dashboard";
 import BuyerAuctionDetail from "@/pages/buyer-auction";
 import BuyerMyBids from "@/pages/buyer-my-bids";
 import BuyerWonAuctions from "@/pages/buyer-won";
+import BuyerPayment from "@/pages/buyer-payment";
 import SellerDashboard from "@/pages/seller-dashboard";
 import SellerCreateAuction from "@/pages/seller-create-auction";
 import SellerAuctionDetail from "@/pages/seller-auction";
 
-// Initialize API client
 initApi();
 
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ component: Component, roleRequired, ...rest }: any) {
   const { user, isLoading } = useAuth();
-  
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 rounded-full bg-primary animate-ping"></div></div>;
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full bg-primary animate-ping" />
+    </div>
+  );
   if (!user) return <Redirect to="/login" />;
   if (roleRequired && user.role !== roleRequired && user.role !== "both") {
     return <Redirect to={user.role === "seller" ? "/seller/dashboard" : "/buyer/dashboard"} />;
   }
-
   return <Component {...rest} />;
 }
 
@@ -44,18 +46,19 @@ function Router() {
         <Route path="/" component={Landing} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
-        
+
         {/* Buyer Routes */}
         <Route path="/buyer/dashboard" component={() => <ProtectedRoute roleRequired="buyer" component={BuyerDashboard} />} />
         <Route path="/buyer/auction/:id" component={() => <ProtectedRoute roleRequired="buyer" component={BuyerAuctionDetail} />} />
         <Route path="/buyer/my-bids" component={() => <ProtectedRoute roleRequired="buyer" component={BuyerMyBids} />} />
         <Route path="/buyer/won" component={() => <ProtectedRoute roleRequired="buyer" component={BuyerWonAuctions} />} />
-        
+        <Route path="/buyer/payment/:id" component={() => <ProtectedRoute roleRequired="buyer" component={BuyerPayment} />} />
+
         {/* Seller Routes */}
         <Route path="/seller/dashboard" component={() => <ProtectedRoute roleRequired="seller" component={SellerDashboard} />} />
         <Route path="/seller/create-auction" component={() => <ProtectedRoute roleRequired="seller" component={SellerCreateAuction} />} />
         <Route path="/seller/auction/:id" component={() => <ProtectedRoute roleRequired="seller" component={SellerAuctionDetail} />} />
-        
+
         <Route component={NotFound} />
       </Switch>
     </Layout>
