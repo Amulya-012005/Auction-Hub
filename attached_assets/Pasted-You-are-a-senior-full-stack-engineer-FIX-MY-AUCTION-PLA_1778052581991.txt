@@ -1,0 +1,291 @@
+You are a senior full-stack engineer.
+
+FIX MY AUCTION PLATFORM COMPLETELY.
+
+Current issues:
+
+1. Sold items are still visible in auction list
+2. Sold items are not appearing in seller sold-items page
+3. Uploaded image URLs are not loading properly
+4. Seller should upload images directly from device
+5. Images must store properly in database/storage
+6. Auction item status handling is incomplete
+
+I need PRODUCTION-GRADE fixes.
+
+====================================================
+ISSUE 1 — SOLD ITEMS STILL SHOWING
+==================================
+
+After seller accepts winning bid:
+
+IMMEDIATELY:
+
+* mark auction as SOLD
+* remove from live auction list
+* move item to sold items section
+* stop realtime bidding
+* disable bid button
+
+====================================================
+DATABASE FIX
+============
+
+Update auction schema:
+
+auctions
+
+* id
+* seller_id
+* title
+* description
+* image_url
+* current_highest_bid
+* highest_bidder_id
+* status
+
+status values:
+
+* live
+* sold
+* expired
+* pending
+
+====================================================
+WHEN SELLER ACCEPTS BID
+=======================
+
+Inside accept bid API:
+
+1. Create auction_result
+2. Update auction status = 'sold'
+3. Save winner information
+4. Remove from live auctions query
+5. Trigger realtime update
+
+====================================================
+LIVE AUCTIONS QUERY FIX
+=======================
+
+IMPORTANT:
+Buyer homepage MUST ONLY FETCH:
+
+SELECT * FROM auctions
+WHERE status = 'live'
+
+DO NOT SHOW SOLD ITEMS.
+
+====================================================
+SELLER SOLD ITEMS PAGE
+======================
+
+Create new seller page:
+
+/seller/sold-items
+
+Display:
+
+* sold item image
+* buyer name
+* sold amount
+* sold date
+* payment status
+* shipping status
+
+Fetch using:
+
+SELECT * FROM auctions
+WHERE seller_id = currentSeller
+AND status = 'sold'
+
+====================================================
+REALTIME SOLD SYNC
+==================
+
+When item becomes SOLD:
+
+* remove instantly from buyer pages
+* remove instantly from auction rooms
+* show SOLD badge
+* notify winner
+
+====================================================
+ISSUE 2 — IMAGE UPLOAD NOT WORKING
+==================================
+
+Currently:
+Image URL manually uploaded is broken.
+
+REMOVE manual image URL system.
+
+Create REAL FILE UPLOAD SYSTEM.
+
+====================================================
+USE SUPABASE STORAGE
+====================
+
+Create storage bucket:
+auction-images
+
+====================================================
+IMAGE UPLOAD FLOW
+=================
+
+Seller should:
+
+1. Click upload image
+2. Select image from device
+3. Preview image instantly
+4. Upload to Supabase Storage
+5. Store public URL in database
+6. Render image everywhere correctly
+
+====================================================
+UPLOAD COMPONENT
+================
+
+Create modern drag-and-drop uploader.
+
+Features:
+
+* drag and drop
+* image preview
+* upload progress
+* remove image button
+* multiple image support
+* file validation
+
+Accept:
+
+* jpg
+* png
+* webp
+
+====================================================
+IMAGE STORAGE IMPLEMENTATION
+============================
+
+Use:
+
+const fileExt = file.name.split('.').pop()
+const fileName = `${Date.now()}-${Math.random()}.${fileExt}`
+
+const { data, error } = await supabase.storage
+.from('auction-images')
+.upload(fileName, file)
+
+Then get public URL:
+
+const {
+data: { publicUrl },
+} = supabase.storage
+.from('auction-images')
+.getPublicUrl(fileName)
+
+Store publicUrl in database.
+
+====================================================
+NEXT.JS IMAGE FIX
+=================
+
+Update next.config.js
+
+Add Supabase domain to image remotePatterns.
+
+Otherwise images won't render.
+
+====================================================
+IMAGE PREVIEW FIX
+=================
+
+Before upload:
+show local preview using:
+
+URL.createObjectURL(file)
+
+====================================================
+CREATE AUCTION PAGE FIX
+=======================
+
+Seller create auction page should contain:
+
+* upload images from device
+* product title
+* category
+* description
+* auction start time
+* auction end time
+* starting price
+* proof documents
+
+====================================================
+IMPORTANT UX REQUIREMENTS
+=========================
+
+UI must feel premium:
+
+* glowing upload area
+* drag-drop animation
+* neon border
+* image hover effects
+* realtime upload progress
+* success toast notifications
+
+====================================================
+ERROR HANDLING
+==============
+
+Handle:
+
+* invalid image type
+* failed upload
+* oversized image
+* missing images
+* storage permission errors
+
+====================================================
+SUPABASE POLICIES
+=================
+
+Create storage policies:
+
+* authenticated sellers can upload
+* public can view images
+
+====================================================
+AFTER FIXES EXPECTED RESULT
+===========================
+
+Seller uploads image from device →
+Image uploads to Supabase →
+Image URL stored in database →
+Image visible everywhere →
+Buyer sees image correctly →
+Auction works realtime →
+Seller accepts bid →
+Item status becomes SOLD →
+Item disappears from live auction list →
+Item appears in seller sold-items page.
+
+====================================================
+FINAL REQUIREMENT
+=================
+
+Generate COMPLETE WORKING CODE:
+
+* upload component
+* storage integration
+* realtime sold sync
+* sold items page
+* database updates
+* Supabase policies
+* API routes
+* frontend fixes
+* backend fixes
+
+NO PLACEHOLDER CODE.
+NO BROKEN IMPORTS.
+NO STATIC DATA.
+NO MANUAL IMAGE URL INPUTS.
+
+Everything must work production-level.

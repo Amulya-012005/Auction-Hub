@@ -19,6 +19,8 @@ tags:
     description: User operations
   - name: categories
     description: Category operations
+  - name: storage
+    description: Object storage upload and serving endpoints
 
 paths:
   /healthz:
@@ -340,6 +342,21 @@ paths:
                 items:
                   $ref: "#/components/schemas/Auction"
 
+  /seller/sold-items:
+    get:
+      operationId: listSellerSoldItems
+      tags: [auctions]
+      summary: List seller's sold auctions with buyer info
+      responses:
+        "200":
+          description: Sold items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SoldItem"
+
   /seller/stats:
     get:
       operationId: getSellerStats
@@ -412,6 +429,58 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ActivityItem"
+
+  # STORAGE endpoints
+  /storage/uploads/request-url:
+    post:
+      tags: [storage]
+      operationId: requestUploadUrl
+      summary: Request a presigned URL for file upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequest"
+      responses:
+        "200":
+          description: Presigned upload URL generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+        "400":
+          description: Missing or invalid required fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /storage/objects/{objectPath}:
+    get:
+      tags: [storage]
+      operationId: getStorageObject
+      summary: Serve an uploaded object
+      parameters:
+        - name: objectPath
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Object content streamed
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
   schemas:
@@ -575,6 +644,32 @@ components:
                 $ref: "#/components/schemas/Bid"
           required: [recentBids]
 
+    SoldItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        category:
+          type: string
+        soldAmount:
+          type: number
+        winnerName:
+          type: ["string", "null"]
+        winnerId:
+          type: ["integer", "null"]
+        soldAt:
+          type: string
+          format: date-time
+        shippingInfo:
+          type: ["string", "null"]
+      required: [id, title, description, imageUrl, category, soldAmount, soldAt]
+
     CreateAuctionBody:
       type: object
       properties:
@@ -709,3 +804,23 @@ components:
           type: string
           format: date-time
       required: [id, bidderName, auctionTitle, auctionId, amount, createdAt]
+
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        contentType:
+          type: string
+
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+        objectPath:
+          type: string

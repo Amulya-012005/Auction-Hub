@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { useListAuctions, useListCategories } from "@workspace/api-client-react";
+import { useState, useEffect } from "react";
+import { useListAuctions, useListCategories, getListAuctionsQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { io } from "socket.io-client";
 import { AuctionCard } from "@/components/auction-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,17 +9,37 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 export default function BuyerDashboard() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("");
   const [sort, setSort] = useState<string>("ending_soon");
+  const queryClient = useQueryClient();
 
-  const { data: auctions, isLoading } = useListAuctions();
+  // Always fetch only LIVE auctions — never show sold/ended items
+  const { data: auctions, isLoading } = useListAuctions({ status: "live" });
   const { data: categories } = useListCategories();
 
-  // Client-side filtering since the hook doesn't accept dynamic params easily without refetching constantly
+  // Listen for auction:sold events to instantly remove sold items from the list
+  useEffect(() => {
+    const socket = io(window.location.origin, { path: "/api/socket.io" });
+
+    socket.on("auction:sold", (data: { auctionId: number; winnerName: string; soldAmount: number; title: string }) => {
+      // Immediately invalidate the live auctions query — sold item will disappear
+      queryClient.invalidateQueries({ queryKey: getListAuctionsQueryKey({ status: "live" }) });
+      queryClient.invalidateQueries({ queryKey: getListAuctionsQueryKey() });
+      toast.info(`"${data.title}" was just sold for $${data.soldAmount.toLocaleString()}!`, {
+        icon: "🔨",
+        duration: 5000,
+      });
+    });
+
+    return () => { socket.disconnect(); };
+  }, [queryClient]);
+
   const filteredAuctions = auctions?.filter(a => {
+    if (a.status !== "live") return false;
     if (search && !a.title.toLowerCase().includes(search.toLowerCase())) return false;
     if (category && category !== "all" && a.category !== category) return false;
     return true;
@@ -36,18 +58,18 @@ export default function BuyerDashboard() {
           <h1 className="text-3xl font-black tracking-tight text-white mb-2">LIVE MARKET</h1>
           <p className="text-muted-foreground">Discover and bid on exclusive active listings.</p>
         </div>
-        
+
         <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search auctions..." 
+            <Input
+              placeholder="Search auctions..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 w-full sm:w-64 bg-card/50 border-border/50 focus-visible:ring-primary/50 font-mono"
             />
           </div>
-          
+
           <Select value={sort} onValueChange={setSort}>
             <SelectTrigger className="w-full sm:w-40 bg-card/50 border-border/50">
               <SelectValue placeholder="Sort by" />
@@ -63,18 +85,18 @@ export default function BuyerDashboard() {
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        <Button 
-          variant={category === "all" || !category ? "default" : "outline"} 
-          size="sm" 
+        <Button
+          variant={category === "all" || !category ? "default" : "outline"}
+          size="sm"
           onClick={() => setCategory("all")}
           className={category === "all" || !category ? "bg-primary hover:bg-primary/90 text-white" : "border-border/50"}
         >
           ALL
         </Button>
         {categories?.map(c => (
-          <Button 
-            key={c.id} 
-            variant={category === c.slug ? "default" : "outline"} 
+          <Button
+            key={c.id}
+            variant={category === c.slug ? "default" : "outline"}
             size="sm"
             onClick={() => setCategory(c.slug)}
             className={category === c.slug ? "bg-primary hover:bg-primary/90 text-white" : "border-border/50"}
@@ -99,7 +121,7 @@ export default function BuyerDashboard() {
           ))}
         </div>
       ) : filteredAuctions && filteredAuctions.length > 0 ? (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ staggerChildren: 0.1 }}
@@ -113,7 +135,7 @@ export default function BuyerDashboard() {
         <div className="text-center py-24 bg-card/20 rounded-xl border border-border/50">
           <h3 className="text-xl font-bold text-muted-foreground mb-2">NO ACTIVE LISTINGS FOUND</h3>
           <p className="text-muted-foreground/60">Try adjusting your search or filters.</p>
-          <Button variant="outline" className="mt-6" onClick={() => {setSearch(""); setCategory("all");}}>
+          <Button variant="outline" className="mt-6" onClick={() => { setSearch(""); setCategory("all"); }}>
             RESET FILTERS
           </Button>
         </div>

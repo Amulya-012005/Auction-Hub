@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, auctionsTable, bidsTable, usersTable } from "@workspace/db";
-import { eq, desc, ilike, gte, lte, and, sql, lt, asc } from "drizzle-orm";
+import { eq, desc, and, sql, lt } from "drizzle-orm";
 import { requireAuth, type AuthRequest } from "../middleware/requireAuth";
 import {
   CreateAuctionBody,
@@ -18,7 +18,10 @@ router.get("/auctions", async (req, res): Promise<void> => {
   let conditions: ReturnType<typeof eq>[] = [];
 
   if (params.category) conditions.push(eq(auctionsTable.category, params.category));
-  if (params.status) conditions.push(eq(auctionsTable.status, params.status));
+
+  // Always filter by status — default to "live" for buyer homepage
+  const statusFilter = params.status ?? "live";
+  conditions.push(eq(auctionsTable.status, statusFilter as any));
 
   let rows = await db
     .select()
@@ -88,7 +91,7 @@ router.get("/auctions/stats/summary", async (_req, res): Promise<void> => {
     .where(eq(auctionsTable.status, "live"));
 
   const now = new Date();
-  const soon = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours
+  const soon = new Date(now.getTime() + 2 * 60 * 60 * 1000);
   const [endingSoonRow] = await db
     .select({ count: sql<number>`count(*)` })
     .from(auctionsTable)
@@ -175,6 +178,22 @@ router.post("/auctions/:id/accept-winner", requireAuth, async (req: AuthRequest,
     .where(eq(auctionsTable.id, id))
     .returning();
 
+  // Emit realtime events: remove from live auctions and notify winner
+  const io = (req as any).app.get("io");
+  if (io) {
+    const soldPayload = {
+      auctionId: id,
+      winnerId: winner.id,
+      winnerName: winner.name,
+      soldAmount: updated.currentBid,
+      title: updated.title,
+    };
+    // Notify everyone in the auction room
+    io.to(`auction:${id}`).emit("auction:sold", soldPayload);
+    // Broadcast globally so all buyer dashboards remove this item instantly
+    io.emit("auction:sold", soldPayload);
+  }
+
   res.json(updated);
 });
 
@@ -186,6 +205,32 @@ router.get("/seller/auctions", requireAuth, async (req: AuthRequest, res): Promi
     .where(eq(auctionsTable.sellerId, req.user!.id))
     .orderBy(desc(auctionsTable.createdAt));
   res.json(rows);
+});
+
+router.get("/seller/sold-items", requireAuth, async (req: AuthRequest, res): Promise<void> => {
+  const rows = await db
+    .select()
+    .from(auctionsTable)
+    .where(and(
+      eq(auctionsTable.sellerId, req.user!.id),
+      eq(auctionsTable.status, "sold"),
+    ))
+    .orderBy(desc(auctionsTable.updatedAt));
+
+  const soldItems = rows.map((a) => ({
+    id: a.id,
+    title: a.title,
+    description: a.description,
+    imageUrl: a.imageUrl,
+    category: a.category,
+    soldAmount: a.currentBid,
+    winnerName: a.winnerName,
+    winnerId: a.winnerId,
+    soldAt: a.updatedAt,
+    shippingInfo: a.shippingInfo,
+  }));
+
+  res.json(soldItems);
 });
 
 router.get("/seller/stats", requireAuth, async (req: AuthRequest, res): Promise<void> => {

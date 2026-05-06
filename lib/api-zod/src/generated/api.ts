@@ -289,6 +289,25 @@ export const ListSellerAuctionsResponse = zod.array(
 );
 
 /**
+ * @summary List seller's sold auctions with buyer info
+ */
+export const ListSellerSoldItemsResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  description: zod.string(),
+  imageUrl: zod.string(),
+  category: zod.string(),
+  soldAmount: zod.number(),
+  winnerName: zod.string().nullish(),
+  winnerId: zod.number().nullish(),
+  soldAt: zod.coerce.date(),
+  shippingInfo: zod.string().nullish(),
+});
+export const ListSellerSoldItemsResponse = zod.array(
+  ListSellerSoldItemsResponseItem,
+);
+
+/**
  * @summary Get seller dashboard stats
  */
 export const GetSellerStatsResponse = zod.object({
@@ -373,3 +392,24 @@ export const GetRecentActivityResponseItem = zod.object({
 export const GetRecentActivityResponse = zod.array(
   GetRecentActivityResponseItem,
 );
+
+/**
+ * @summary Request a presigned URL for file upload
+ */
+export const RequestUploadUrlBody = zod.object({
+  name: zod.string(),
+  size: zod.number(),
+  contentType: zod.string(),
+});
+
+export const RequestUploadUrlResponse = zod.object({
+  uploadURL: zod.string(),
+  objectPath: zod.string(),
+});
+
+/**
+ * @summary Serve an uploaded object
+ */
+export const GetStorageObjectParams = zod.object({
+  objectPath: zod.coerce.string(),
+});

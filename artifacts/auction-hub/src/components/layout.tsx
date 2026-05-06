@@ -37,7 +37,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </>
             )}
             {(user?.role === "seller" || user?.role === "both") && (
-              <NavLink href="/seller/dashboard" active={location.startsWith("/seller/dashboard")}>Seller Dashboard</NavLink>
+              <>
+                <NavLink href="/seller/dashboard" active={location === "/seller/dashboard"}>Dashboard</NavLink>
+                <NavLink href="/seller/sold-items" active={location.startsWith("/seller/sold-items")}>Sold Items</NavLink>
+              </>
             )}
           </nav>
 

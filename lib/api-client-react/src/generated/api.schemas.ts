@@ -116,6 +116,22 @@ export type AuctionDetail = Auction & {
   recentBids: Bid[];
 };
 
+export interface SoldItem {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  category: string;
+  soldAmount: number;
+  /** @nullable */
+  winnerName?: string | null;
+  /** @nullable */
+  winnerId?: number | null;
+  soldAt: string;
+  /** @nullable */
+  shippingInfo?: string | null;
+}
+
 export interface CreateAuctionBody {
   title: string;
   description: string;
@@ -180,6 +196,17 @@ export interface ActivityItem {
   auctionId: number;
   amount: number;
   createdAt: string;
+}
+
+export interface UploadUrlRequest {
+  name: string;
+  size: number;
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
 }
 
 export type ListAuctionsParams = {

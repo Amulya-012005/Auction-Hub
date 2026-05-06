@@ -20,6 +20,7 @@ import BuyerPayment from "@/pages/buyer-payment";
 import SellerDashboard from "@/pages/seller-dashboard";
 import SellerCreateAuction from "@/pages/seller-create-auction";
 import SellerAuctionDetail from "@/pages/seller-auction";
+import SellerSoldItems from "@/pages/seller-sold-items";
 
 initApi();
 
@@ -58,6 +59,7 @@ function Router() {
         <Route path="/seller/dashboard" component={() => <ProtectedRoute roleRequired="seller" component={SellerDashboard} />} />
         <Route path="/seller/create-auction" component={() => <ProtectedRoute roleRequired="seller" component={SellerCreateAuction} />} />
         <Route path="/seller/auction/:id" component={() => <ProtectedRoute roleRequired="seller" component={SellerAuctionDetail} />} />
+        <Route path="/seller/sold-items" component={() => <ProtectedRoute roleRequired="seller" component={SellerSoldItems} />} />
 
         <Route component={NotFound} />
       </Switch>
