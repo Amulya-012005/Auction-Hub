@@ -1,0 +1,481 @@
+MASTER PROMPT FOR REPLIT AI AGENT / V0 / LOVABLE / CURSOR
+
+You are a senior full-stack engineer, UI/UX architect, realtime systems engineer, and production-grade SaaS designer.
+
+Build a COMPLETE HIGH-END LIVE AUCTION PLATFORM with TWO COMPLETELY SEPARATE FLOWS:
+
+1. BUYER FLOW (Start Bidding)
+2. SELLER FLOW (Start Selling)
+
+These two systems MUST NEVER MIX.
+
+The project must look MODERN, PREMIUM, ANIMATED, CLEAN, FUTURISTIC, and HACKATHON-WINNING.
+
+Use:
+
+- Next.js 15
+- TypeScript
+- TailwindCSS
+- Framer Motion
+- Clerk Authentication
+- Firebase / Supabase realtime database
+- ShadCN UI
+- Zustand or Context API
+- Responsive Design
+- Dark Theme
+- Glassmorphism UI
+- Neon Purple + Blue + Pink Theme
+- Realtime Auction Synchronization
+- Realtime Highest Bid Updates
+- Realtime Countdown Timer
+
+IMPORTANT:
+Generate ERROR-FREE CODE.
+NO PLACEHOLDER BROKEN COMPONENTS.
+NO BLANK PAGES.
+NO IMPORT ERRORS.
+NO HYDRATION ERRORS.
+NO BUILD FAILURES.
+NO MISSING DEPENDENCIES.
+NO TYPESCRIPT ERRORS.
+
+====================================================
+MAIN LANDING PAGE
+
+Create a BEAUTIFUL animated landing page.
+
+BACKGROUND:
+
+- Animated gradient mesh
+- Floating glowing purple/pink/blue particles
+- Smooth wave animations
+- Floating neon boxes
+- Slow rotating blurred orbs
+- Glassmorphism cards
+- Premium futuristic feel
+
+TOP LEFT:
+
+- Website Logo
+- Website Name
+
+CENTER:
+
+- Large premium quote/caption about auctions
+
+Example:
+"Where Smart Bidding Meets Trusted Selling."
+
+Use stylish typography with highlighted glowing words.
+
+Below quote:
+Two HUGE buttons:
+
+1. START BIDDING
+2. START SELLING
+
+Buttons should have:
+
+- hover glow
+- smooth scale animation
+- neon borders
+- gradient fill
+- ripple effect
+
+====================================================
+AUTHENTICATION SYSTEM
+
+Use CLERK AUTHENTICATION.
+
+VERY IMPORTANT:
+BUYER AUTHENTICATION and SELLER AUTHENTICATION must be COMPLETELY SEPARATE.
+
+Buyer session and seller session must NEVER mix.
+
+Create:
+
+- /buyer/*
+- /seller/*
+
+Separate protected layouts and routes.
+
+Buyer login:
+
+- Google login
+- Email login
+
+Seller login:
+
+- Google login
+- Email login
+
+Maintain separate dashboards.
+
+====================================================
+BUYER FLOW
+
+When user clicks:
+START BIDDING
+
+Redirect to:
+Buyer Authentication Page.
+
+After successful login:
+Redirect to BUYER DASHBOARD.
+
+====================================================
+BUYER DASHBOARD
+
+Create a HIGH-END dashboard with:
+
+- live auctions
+- search
+- filters
+- categories
+- realtime updates
+
+VERY IMPORTANT:
+Create MINIMUM 10 DUMMY LIVE AUCTIONS automatically for demo purposes.
+
+These auctions should already exist on first startup.
+
+Create different categories:
+
+- Electronics
+- Vehicles
+- Cosmetics
+- Fashion
+- Sneakers
+- Watches
+- Gold
+- Furniture
+- Gaming
+- Collectibles
+
+Each auction card must contain:
+
+- Product Image
+- Product Name
+- Current Highest Bid
+- Remaining Time
+- Seller Rating
+- Live Indicator
+- Bid Count
+- Animated hover effects
+
+Add:
+
+- Search bar
+- Filter by category
+- Filter by price
+- Sort options
+
+====================================================
+AUCTION DETAIL PAGE
+
+When buyer opens auction:
+
+LEFT SIDE:
+
+- Large product image
+- Product details
+- Description
+- Seller verification
+- Hallmark/license info if applicable
+- Shipping details
+
+RIGHT SIDE:
+
+- CURRENT HIGHEST BID
+- LIVE REALTIME TIMER
+- LIVE BID ACTIVITY
+- Recommended bid amounts
+
+IMPORTANT:
+Timer must be GLOBAL.
+
+DO NOT create separate timers for each user.
+
+Example:
+Auction starts at 9:00 PM and ends at 10:00 PM.
+
+ALL USERS must see SAME countdown.
+
+Implement realtime synchronized timer.
+
+====================================================
+LIVE BIDDING SYSTEM
+
+Display:
+
+- Current highest bid
+- Recently placed bids
+- Total bidders
+
+Generate smart suggested bids:
+Example:
++100
++500
++1000
+
+Buyer selects bid amount and clicks:
+PLACE BID
+
+Update all clients in REALTIME instantly.
+
+Use websockets or Firebase realtime listeners.
+
+====================================================
+WAITING STATE
+
+After buyer places bid:
+Show:
+"Waiting for seller decision..."
+
+Buyer stays on page until:
+
+- seller accepts winner
+  OR
+- auction ends
+
+====================================================
+RESULT PAGE
+
+After seller accepts winner:
+
+Buyer sees:
+
+- Winner Name
+- Winning Amount
+- Product Name
+- Auction Status
+- Payment Button
+
+If buyer loses:
+Show:
+"Better luck next time."
+
+====================================================
+PAYMENT SYSTEM
+
+Create professional payment page.
+
+Features:
+
+- Razorpay or Stripe integration structure
+- Secure checkout UI
+- Order summary
+- Shipping address form
+- Payment confirmation
+
+====================================================
+PAYMENT DEADLINE LOGIC
+
+VERY IMPORTANT BUSINESS LOGIC:
+
+If winner DOES NOT pay within specific time:
+
+- auction goes to second-highest bidder
+  OR
+- item returns to resale auction
+
+Create automated timeout handling.
+
+Display countdown for payment deadline.
+
+====================================================
+SELLER FLOW
+
+When user clicks:
+START SELLING
+
+Redirect to:
+SELLER AUTHENTICATION
+
+Separate seller account.
+
+After login:
+Redirect to SELLER DASHBOARD.
+
+====================================================
+SELLER DASHBOARD
+
+Create:
+
+- seller profile
+- earnings overview
+- active auctions
+- pending approvals
+- bid management
+
+====================================================
+CREATE AUCTION PAGE
+
+Seller uploads:
+
+- Product Images
+- Product Name
+- Description
+- Starting Price
+- Category
+- Auction Start Time
+- Auction End Time
+- Shipping Info
+
+====================================================
+SELLER VERIFICATION
+
+VERY IMPORTANT:
+
+Seller must upload:
+
+- identity proof
+- product proof
+- license documents
+- hallmark certification for gold
+- authenticity proof
+
+System verifies before auction approval.
+
+Create:
+Pending Verification state.
+
+====================================================
+SELLER LIVE BIDS VIEW
+
+Seller must see:
+
+- bidder name
+- bidder ID
+- shipping address
+- current bid amount
+- bidder location
+
+Each bidder card should have:
+ACCEPT BID button
+
+When seller clicks ACCEPT:
+That bidder instantly becomes WINNER.
+
+Realtime update buyer page immediately.
+
+====================================================
+REALTIME SYNCHRONIZATION
+
+Implement:
+
+- realtime highest bid sync
+- realtime timer sync
+- realtime winner announcement
+- realtime auction state updates
+
+All users viewing same auction must see same values.
+
+====================================================
+UI/UX REQUIREMENTS
+
+DESIGN MUST LOOK:
+
+- futuristic
+- premium
+- startup-level
+- investor-ready
+- hackathon-winning
+
+Use:
+
+- neon gradients
+- purple/pink/blue palette
+- floating animations
+- glass cards
+- animated shadows
+- smooth transitions
+- shimmer loading
+- micro-interactions
+
+Add:
+
+- Framer Motion page transitions
+- floating particles
+- animated buttons
+- glowing borders
+- animated auction cards
+- responsive layouts
+
+====================================================
+TECHNICAL REQUIREMENTS
+
+Build FULL project structure.
+
+Generate:
+
+- components
+- pages
+- hooks
+- API routes
+- database schema
+- Clerk setup
+- realtime listeners
+- mock auction seed data
+- protected routes
+- reusable UI components
+
+IMPORTANT:
+Code must RUN immediately.
+
+Fix:
+
+- hydration issues
+- deployment issues
+- routing issues
+- import issues
+- TypeScript issues
+- environment variable issues
+
+====================================================
+DEMO MODE
+
+VERY IMPORTANT FOR HACKATHON:
+
+Auto-generate:
+
+- 10 live auctions
+- active bids
+- dummy realtime activity
+- seller accounts
+- buyer accounts
+- fake bid history
+
+So evaluators can instantly see working platform.
+
+====================================================
+FINAL REQUIREMENTS
+
+Generate:
+
+1. Complete frontend
+2. Complete backend
+3. Realtime functionality
+4. Clerk authentication
+5. Database schema
+6. Demo auction data
+7. Production-ready folder structure
+8. Mobile responsive design
+9. Dark futuristic UI
+10. Error-free deployment configuration
+
+The app must feel like:
+"eBay + StockX + futuristic AI auction platform."
+
+The experience should impress hackathon judges immediately.
+
+PRIORITY:
+
+- Stunning UI/UX
+- Smooth animations
+- Realtime synchronization
+- Stable functionality
+- Clean architecture
+- Error-free deployment
+
+Build everything professionally from scratch.
