@@ -1,68 +1,72 @@
-# Auction-Hub
+# Live Auction Platform
 
-A complete live auction platform with separate buyer and seller flows, realtime bidding via Socket.io, and a dark futuristic UI.
+A production-grade real-time auction platform where sellers list items and buyers bid in live auctions — with instant bid synchronization across all connected clients via WebSockets.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080, Socket.io on /api/socket.io)
-- `pnpm --filter @workspace/auction-hub run dev` — run the frontend (port varies, preview at /)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL`, `SESSION_SECRET`
+| Command | What it does |
+|---|---|
+| `pnpm run --filter @workspace/api-spec codegen` | Regenerate API client + Zod schemas from OpenAPI spec |
+| `pnpm --filter @workspace/db run push` | Push DB schema changes to PostgreSQL |
+| `pnpm run typecheck` | Full TypeScript check (libs + artifacts) |
+
+Required env vars: `DATABASE_URL`, `SESSION_SECRET` (optional, has default)
+
+Demo accounts (password: `password123`):
+- Seller: `seller@demo.com`
+- Buyer: `buyer@demo.com`
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- Frontend: React + Vite, TailwindCSS, Framer Motion, Wouter, shadcn/ui, socket.io-client
-- API: Express 5 + Socket.io (realtime bidding)
-- DB: PostgreSQL + Drizzle ORM (tables: users, auctions, bids, categories)
-- Auth: JWT (bcryptjs + jsonwebtoken), token stored in localStorage
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- **Frontend**: React 18 + Vite + TailwindCSS v4 + ShadCN UI + Framer Motion
+- **Backend**: Express 5 + Socket.io (realtime) + Pino logging
+- **Database**: PostgreSQL via Replit managed DB, Drizzle ORM
+- **Auth**: JWT (bcryptjs) stored in localStorage
+- **Codegen**: Orval → React Query hooks + Zod schemas from OpenAPI spec
+- **Build**: ESBuild for server, Vite for client
 
 ## Where things live
 
-- `lib/api-spec/openapi.yaml` — OpenAPI source of truth
-- `lib/db/src/schema/` — DB schema (users, auctions, bids, categories)
-- `artifacts/api-server/src/routes/` — Express route handlers (auth, auctions, bids, categories)
-- `artifacts/api-server/src/lib/auth.ts` — JWT + bcrypt helpers
-- `artifacts/api-server/src/middleware/requireAuth.ts` — JWT auth middleware
-- `artifacts/auction-hub/src/` — React frontend
-- `artifacts/auction-hub/src/hooks/use-auth.ts` — auth context/hook
-- `artifacts/auction-hub/src/pages/` — all pages (landing, login, register, buyer/*, seller/*)
+```
+artifacts/auction-hub/   ← React frontend (preview path: /)
+artifacts/api-server/    ← Express API + Socket.io (preview path: /api)
+lib/api-spec/            ← openapi.yaml — source of truth for API contracts
+lib/api-zod/             ← Generated Zod request/response validators
+lib/api-client-react/    ← Generated React Query hooks
+lib/db/src/schema/       ← Drizzle table definitions (users, auctions, bids, categories)
+```
 
 ## Architecture decisions
 
-- JWT auth (not session-based): token stored in localStorage as `auction_hub_token`, sent as Bearer header in all API calls
-- Socket.io path is `/api/socket.io` (served by Express HTTP server alongside REST API)
-- Separate buyer/seller protected routes enforced client-side by role check from JWT user
-- Realtime bids: server emits `bid:new` to room `auction:{id}` on every placed bid; clients join room on auction detail page mount
-- OpenAPI-first: all API contracts defined in `openapi.yaml`, codegen produces typed React Query hooks and Zod schemas
+- **Socket.io for realtime**: When a bid is placed, the server emits `bid:new` globally (all clients) AND to the auction-specific room. This lets both buyer auction pages AND the seller dashboard update instantly without polling.
+- **JWT in localStorage**: Auth token stored client-side, sent as `Authorization: Bearer <token>`. The `setAuthTokenGetter` from api-client-react injects it on every request.
+- **No Supabase/Clerk**: Uses Replit's built-in PostgreSQL + custom JWT auth — same production architecture without external service dependencies.
+- **Orval codegen without schemas**: Removed `schemas: { path: "generated/types" }` from orval config to eliminate duplicate export TS2308 errors in `api-zod`.
+- **Global bid broadcast**: `io.emit("bid:new", ...)` fires globally so seller dashboards receive all bids, not just auction-specific room subscribers.
 
 ## Product
 
-- Landing page with live stats (active auctions, total bids, total value)
-- Buyer flow: browse live auctions with search/filter/sort, place bids in realtime, view bid history, see won auctions
-- Seller flow: create auctions, view all bids per auction, manually accept winner
-- 10 pre-seeded demo auctions across 10 categories (Electronics, Vehicles, Watches, Sneakers, Gaming, Gold, Fashion, Furniture, Cosmetics, Collectibles)
-- Demo accounts: `demo.buyer@hub.com` / `password123` (buyer), `alex@seller.com` / `password123` (seller)
+- **Landing page**: Live stats (active auctions, total bids, total value) + recent activity feed
+- **Buyer flow**: Browse auctions → Bid with real-time countdown timer → Track bids → View won auctions
+- **Seller flow**: Register as seller → Create auction with image URL + timing → Live dashboard with instant bid notifications → Accept winner
+- **Realtime**: Every bid triggers Socket.io events — buyer sees the new bid, seller dashboard shows toast + refreshes counters instantly
 
 ## User preferences
 
-- Dark futuristic theme always (no light mode)
-- Brand colors: deep dark bg (#0a0a0f), neon red/crimson primary (hsl 355 85% 50%)
-- No emojis in UI
+- Futuristic dark UI: deep black/dark-gray backgrounds, red primary accent, glassmorphism cards
+- No Supabase or Clerk — use native Replit infrastructure
+- All bids must persist in PostgreSQL — no frontend-only state
 
 ## Gotchas
 
-- Password hash in seed data uses bcrypt rounds=12 with hardcoded hash — if changing password logic, re-seed users
-- Socket.io WS path `/api/socket.io` must be listed in artifact.toml paths for the proxy to forward WS connections
-- `useAcceptWinner` hook requires `id` param (auction id) — pass as first arg
+- Socket.io path is `/api/socket.io` — must match both server (`path: "/api/socket.io"`) and client (`io(origin, { path: "/api/socket.io" })`)
+- The `auction-hub` preview serves at `/` — the `api-server` serves at `/api`
+- After changing `openapi.yaml`, always run codegen before touching routes/frontend
+- `lib/api-zod/src/index.ts` is auto-generated by orval — do not manually add exports to it
 
 ## Pointers
 
-- See `pnpm-workspace` skill for workspace structure
-- See `lib/api-spec/openapi.yaml` for all endpoint contracts
+- DB schema: `lib/db/src/schema/`
+- API routes: `artifacts/api-server/src/routes/`
+- Frontend pages: `artifacts/auction-hub/src/pages/`
+- Socket.io server config: `artifacts/api-server/src/index.ts`

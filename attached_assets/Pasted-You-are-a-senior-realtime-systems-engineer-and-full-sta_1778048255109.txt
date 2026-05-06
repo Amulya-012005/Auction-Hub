@@ -1,0 +1,317 @@
+You are a senior realtime systems engineer and full-stack architect.
+
+FIX MY LIVE AUCTION PLATFORM IMMEDIATELY.
+
+CURRENT ISSUE:
+Buyer bid amount is working locally but NOT updating on seller dashboard in realtime.
+
+I need PROPER DATABASE IMPLEMENTATION and REALTIME SYNCHRONIZATION between buyer and seller.
+
+====================================================
+CRITICAL FIXES REQUIRED
+=======================
+
+1. REALTIME BID SYNCHRONIZATION
+2. PROPER DATABASE ARCHITECTURE
+3. SELLER ITEM UPLOAD SYSTEM
+4. LIVE BID STREAMING
+5. SHARED AUCTION STATE
+6. PROPER BACKEND APIs
+7. REALTIME DATABASE LISTENERS
+
+====================================================
+TECH STACK
+==========
+
+Use:
+
+* Next.js 15
+* TypeScript
+* Supabase PostgreSQL Database
+* Supabase Realtime
+* Clerk Authentication
+* Prisma ORM
+* TailwindCSS
+* ShadCN UI
+
+DO NOT USE LOCAL STATE FOR BIDS.
+
+ALL BIDS MUST COME FROM DATABASE.
+
+====================================================
+MAIN PROBLEM TO FIX
+===================
+
+Currently:
+Buyer places bid →
+Bid updates only in buyer page →
+Seller cannot see updated bid.
+
+THIS IS WRONG.
+
+CORRECT BEHAVIOR:
+
+Buyer places bid →
+Bid saved in database →
+Supabase realtime event triggered →
+Seller dashboard updates instantly →
+All buyers viewing same auction update instantly →
+Highest bid updates everywhere globally.
+
+====================================================
+DATABASE ARCHITECTURE
+=====================
+
+Create proper PostgreSQL schema.
+
+TABLES:
+
+users
+
+* id
+* clerk_id
+* role (buyer/seller)
+* name
+* email
+* address
+* created_at
+
+auctions
+
+* id
+* seller_id
+* title
+* description
+* category
+* starting_price
+* current_highest_bid
+* highest_bidder_id
+* start_time
+* end_time
+* image_url
+* status
+* created_at
+
+bids
+
+* id
+* auction_id
+* bidder_id
+* amount
+* created_at
+
+auction_results
+
+* id
+* auction_id
+* winner_id
+* winning_amount
+* seller_accepted
+* payment_status
+
+====================================================
+REALTIME SYSTEM
+===============
+
+IMPLEMENT SUPABASE REALTIME SUBSCRIPTIONS.
+
+When new bid inserted:
+
+* all clients listening to that auction must update instantly.
+
+Implement:
+supabase
+.channel()
+.on(
+'postgres_changes',
+{
+event: 'INSERT',
+schema: 'public',
+table: 'bids'
+},
+(payload) => {
+updateUI(payload)
+}
+)
+
+====================================================
+BUYER BID FLOW
+==============
+
+When buyer clicks PLACE BID:
+
+1. Validate amount
+2. Insert into bids table
+3. Update auction current_highest_bid
+4. Update highest_bidder_id
+5. Trigger realtime sync
+6. Refresh seller dashboard instantly
+
+IMPORTANT:
+DO NOT use fake frontend-only updates.
+
+====================================================
+SELLER DASHBOARD FIX
+====================
+
+Seller dashboard must:
+
+* listen to realtime bid updates
+* instantly show new bidder
+* instantly show updated highest amount
+* update without refresh
+
+Seller must see:
+
+* bidder name
+* bidder amount
+* shipping address
+* time of bid
+
+====================================================
+SELLER ITEM UPLOAD SYSTEM
+=========================
+
+Currently seller upload is incomplete.
+
+FIX IT PROPERLY.
+
+Create:
+FULL AUCTION CREATION FLOW.
+
+Seller uploads:
+
+* title
+* description
+* category
+* images
+* auction timing
+* starting price
+* proof documents
+* shipping info
+
+====================================================
+IMAGE STORAGE
+=============
+
+Use:
+Supabase Storage.
+
+Upload images properly and store public URLs in database.
+
+DO NOT STORE BASE64.
+
+====================================================
+CREATE AUCTION API
+==================
+
+Create proper backend route:
+
+POST /api/auction/create
+
+This should:
+
+1. Validate seller
+2. Upload images
+3. Store auction in database
+4. Return success response
+5. Trigger realtime updates
+
+====================================================
+AUCTION LIST FIX
+================
+
+Homepage auctions MUST come from DATABASE.
+
+NOT HARDCODED.
+
+Fetch:
+SELECT * FROM auctions
+WHERE status='live'
+
+====================================================
+GLOBAL TIMER FIX
+================
+
+Timer must be based on:
+auction.end_time from database.
+
+NOT local timer.
+
+All users must see same remaining time.
+
+====================================================
+STATE MANAGEMENT
+================
+
+Use:
+
+* Zustand OR React Query
+
+Avoid prop drilling.
+
+====================================================
+CRITICAL REQUIREMENTS
+=====================
+
+NO:
+
+* fake local state
+* static auction arrays
+* frontend-only bidding
+* dummy unsynced state
+
+YES:
+
+* database-driven UI
+* realtime subscriptions
+* global synchronization
+* production architecture
+
+====================================================
+UI REQUIREMENTS
+===============
+
+Keep:
+
+* futuristic purple/blue/pink UI
+* glassmorphism
+* animations
+* realtime live indicators
+
+Add:
+
+* LIVE badge pulse animation
+* smooth realtime updates
+* animated bid cards
+* realtime activity feed
+
+====================================================
+IMPORTANT
+=========
+
+Fix ALL:
+
+* TypeScript errors
+* database errors
+* Supabase auth issues
+* Clerk session issues
+* hydration issues
+* upload issues
+* websocket issues
+
+Generate CLEAN scalable code architecture.
+
+====================================================
+FINAL EXPECTED RESULT
+=====================
+
+Buyer places bid →
+Database updates →
+Seller sees instantly →
+All users see same highest bid →
+Realtime synchronization works globally →
+Seller uploads items successfully →
+Auctions persist in database permanently.
+
+This must feel like a REAL production auction platform.

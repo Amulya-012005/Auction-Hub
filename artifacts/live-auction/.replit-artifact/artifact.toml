@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Live Auction Platform"
+version = "1.0.0"
+id = "artifacts/live-auction"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24421
+
+[services.development]
+run = "pnpm --filter @workspace/live-auction run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/live-auction", "run", "build" ]
+publicDir = "artifacts/live-auction/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24421"
+BASE_PATH = "/"

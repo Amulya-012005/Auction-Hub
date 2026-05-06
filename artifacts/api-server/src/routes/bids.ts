@@ -58,11 +58,17 @@ router.post("/auctions/:id/bids", requireAuth, async (req: AuthRequest, res): Pr
   // Emit socket event if io is available
   const io = (req as any).app.get("io");
   if (io) {
-    io.to(`auction:${id}`).emit("bid:new", {
+    const bidPayload = {
       bid,
       currentBid: parsed.data.amount,
       bidCount: auction.bidCount + 1,
-    });
+      auctionId: id,
+      auctionTitle: auction.title,
+    };
+    // Emit to buyers watching this specific auction
+    io.to(`auction:${id}`).emit("bid:new", bidPayload);
+    // Broadcast globally so seller dashboards update instantly for any auction
+    io.emit("bid:new", bidPayload);
     io.emit("activity:new", {
       id: bid.id,
       bidderName: user.name,
