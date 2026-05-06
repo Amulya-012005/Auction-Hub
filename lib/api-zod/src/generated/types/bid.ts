@@ -6,6 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface Bid {
+  id: number;
+  auctionId: number;
+  bidderId: number;
+  bidderName: string;
+  amount: number;
+  createdAt: Date;
 }
