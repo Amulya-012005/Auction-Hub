@@ -80,6 +80,17 @@ export default function BuyerAuctionDetail() {
       }
     });
 
+    socket.on("auction:ended", (data: { auctionId: number; finalBid: number; bidCount: number }) => {
+      if (data.auctionId === id) {
+        queryClient.invalidateQueries({ queryKey: getGetAuctionQueryKey(id) });
+        queryClient.invalidateQueries({ queryKey: getListBidsQueryKey(id) });
+        toast.warning("Bidding has closed — the seller will now accept a winner.", {
+          icon: "⏱️",
+          duration: 6000,
+        });
+      }
+    });
+
     return () => { socket.disconnect(); };
   }, [id, queryClient]);
 

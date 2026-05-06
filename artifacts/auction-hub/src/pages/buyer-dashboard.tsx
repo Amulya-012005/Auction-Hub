@@ -17,16 +17,13 @@ export default function BuyerDashboard() {
   const [sort, setSort] = useState<string>("ending_soon");
   const queryClient = useQueryClient();
 
-  // Always fetch only LIVE auctions — never show sold/ended items
   const { data: auctions, isLoading } = useListAuctions({ status: "live" });
   const { data: categories } = useListCategories();
 
-  // Listen for auction:sold events to instantly remove sold items from the list
   useEffect(() => {
     const socket = io(window.location.origin, { path: "/api/socket.io" });
 
     socket.on("auction:sold", (data: { auctionId: number; winnerName: string; soldAmount: number; title: string }) => {
-      // Immediately invalidate the live auctions query — sold item will disappear
       queryClient.invalidateQueries({ queryKey: getListAuctionsQueryKey({ status: "live" }) });
       queryClient.invalidateQueries({ queryKey: getListAuctionsQueryKey() });
       toast.info(`"${data.title}" was just sold for $${data.soldAmount.toLocaleString()}!`, {
@@ -35,11 +32,23 @@ export default function BuyerDashboard() {
       });
     });
 
+    socket.on("auction:ended", (data: { auctionId: number; title: string; finalBid: number; bidCount: number }) => {
+      queryClient.invalidateQueries({ queryKey: getListAuctionsQueryKey({ status: "live" }) });
+      queryClient.invalidateQueries({ queryKey: getListAuctionsQueryKey() });
+      toast.warning(`"${data.title}" has ended — final bid $${data.finalBid.toLocaleString()}`, {
+        icon: "⏱️",
+        duration: 5000,
+      });
+    });
+
     return () => { socket.disconnect(); };
   }, [queryClient]);
 
+  const now = new Date();
+
   const filteredAuctions = auctions?.filter(a => {
     if (a.status !== "live") return false;
+    if (new Date(a.endTime) <= now) return false;
     if (search && !a.title.toLowerCase().includes(search.toLowerCase())) return false;
     if (category && category !== "all" && a.category !== category) return false;
     return true;

@@ -7,7 +7,7 @@ import { AuctionCard } from "@/components/auction-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PlusCircle, Activity, DollarSign, LayoutList, CheckCircle, Zap } from "lucide-react";
+import { PlusCircle, Activity, DollarSign, CheckCircle, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
@@ -19,10 +19,6 @@ export default function SellerDashboard() {
   useEffect(() => {
     const socket = io(window.location.origin, { path: "/api/socket.io" });
 
-    socket.on("connect", () => {
-      socket.emit("join:seller-dashboard");
-    });
-
     socket.on("bid:new", (data: { bid: { bidderName: string; amount: number }; currentBid: number }) => {
       queryClient.invalidateQueries({ queryKey: getListSellerAuctionsQueryKey() });
       queryClient.invalidateQueries({ queryKey: getGetSellerStatsQueryKey() });
@@ -32,14 +28,21 @@ export default function SellerDashboard() {
       });
     });
 
-    socket.on("activity:new", () => {
+    socket.on("auction:ended", (data: { auctionId: number; title: string; finalBid: number }) => {
+      queryClient.invalidateQueries({ queryKey: getListSellerAuctionsQueryKey() });
+      queryClient.invalidateQueries({ queryKey: getGetSellerStatsQueryKey() });
+      toast.warning(`"${data.title}" has expired — final bid $${data.finalBid.toLocaleString()}. Accept a winner to close the sale.`, {
+        icon: "⏱️",
+        duration: 8000,
+      });
+    });
+
+    socket.on("auction:sold", () => {
       queryClient.invalidateQueries({ queryKey: getListSellerAuctionsQueryKey() });
       queryClient.invalidateQueries({ queryKey: getGetSellerStatsQueryKey() });
     });
 
-    return () => {
-      socket.disconnect();
-    };
+    return () => { socket.disconnect(); };
   }, [queryClient]);
 
   return (

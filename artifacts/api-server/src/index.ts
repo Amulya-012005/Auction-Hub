@@ -2,6 +2,7 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import app from "./app";
 import { logger } from "./lib/logger";
+import { startAuctionExpiryJob } from "./lib/auctionExpiry";
 
 const rawPort = process.env["PORT"];
 
@@ -45,4 +46,5 @@ io.on("connection", (socket) => {
 
 httpServer.listen(port, () => {
   logger.info({ port }, "Server listening with Socket.io");
+  startAuctionExpiryJob(io);
 });

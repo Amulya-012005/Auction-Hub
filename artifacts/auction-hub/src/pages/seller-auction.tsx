@@ -51,11 +51,23 @@ export default function SellerAuctionDetail() {
 
     socket.on("auction:sold", (data: { auctionId: number; winnerName: string; soldAmount: number }) => {
       if (data.auctionId === id) {
-        // Refresh everything so the UI reflects the sold state
         queryClient.invalidateQueries({ queryKey: getGetAuctionQueryKey(id) });
         queryClient.invalidateQueries({ queryKey: getListBidsQueryKey(id) });
         queryClient.invalidateQueries({ queryKey: getListSellerAuctionsQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetSellerStatsQueryKey() });
+      }
+    });
+
+    socket.on("auction:ended", (data: { auctionId: number; finalBid: number; bidCount: number }) => {
+      if (data.auctionId === id) {
+        queryClient.invalidateQueries({ queryKey: getGetAuctionQueryKey(id) });
+        queryClient.invalidateQueries({ queryKey: getListBidsQueryKey(id) });
+        queryClient.invalidateQueries({ queryKey: getListSellerAuctionsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetSellerStatsQueryKey() });
+        toast.warning("Auction time expired — review bids above and accept a winner.", {
+          icon: "⏱️",
+          duration: 8000,
+        });
       }
     });
 
